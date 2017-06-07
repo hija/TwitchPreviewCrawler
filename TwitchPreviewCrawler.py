@@ -14,8 +14,11 @@ class TwitchPreviewCrawler:
 
 def main():
 	# Load data from config file
-	_load_config()
-	print("Test successful!")
+	config = _load_config()
+	if config:
+		print('Test successful')
+	else:
+		exit_missing_credentials()
 
 def _load_config():
 	if os.path.exists('config.ini'):
@@ -24,7 +27,7 @@ def _load_config():
 		if config_parser.has_option('Twitch', 'key') and len(config_parser.get('Twitch', 'key')) > 0:
 			return config_parser
 		else:
-			exit_missing_credentials()
+			return False
 	else:
 		with open('config.ini','w') as f:
 			config_parser = configparser.ConfigParser(allow_no_value=True)
@@ -33,7 +36,7 @@ def _load_config():
 			config_parser.set('Twitch', 'key')
 			config_parser.set('Twitch', 'min_delay', '60')
 			config_parser.write(f)
-		exit_missing_credentials()
+		return False
 
 def exit_missing_credentials():
 	print('>> Please enter the credentials to the config.ini first!')
