@@ -5,18 +5,41 @@ from twitch import TwitchClient
 import configparser
 import os
 
+import logging
+import sys
+
 class TwitchPreviewCrawler:
 
-	def __init__(self, twitch_api_key):
-		self.twitch_api_key = twitch_api_key
-		self.client = TwitchClient(client_id = self.twitch_api_key)
+	def __init__(self, twitch_api_key,topgames = None):
+		self.__twitch_api_key = twitch_api_key
+		self._client = TwitchClient(client_id = self.__twitch_api_key)
 
+		# Load topgames...
+		if not(topgames):
+			# ... either from twitch
+			self.topgames = list(self._get_top_games().keys())
+		else:
+			# ... or from our config file
+			self.topgames = topgames
+		
+	def _get_top_games(self):
+		# Get top games
+		logging.info('>> Loading top games, since no top games have been predefined')
+		_top_games = dict()
+		for entry in self._client.games.get_top():
+			_top_games[int(entry['game']['id'])] = entry['game']['name']
+		logging.debug('>> Found the following games: ' + ', '.join(_top_games.values()))
+		return _top_games
 
 def main():
+	# Setup logging
+	logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 	# Load data from config file
 	config = _load_config()
 	if config:
-		print('Test successful')
+		logging.info('>> Start Crawling data')
+		twitch_crawler = TwitchPreviewCrawler(config.get('Twitch', 'key'))
+		print(twitch_crawler.topgames)
 	else:
 		exit_missing_credentials()
 
@@ -39,7 +62,7 @@ def _load_config():
 		return False
 
 def exit_missing_credentials():
-	print('>> Please enter the credentials to the config.ini first!')
+	logging.error('>> Please enter the credentials to the config.ini first!')
 	exit()
 
 if __name__ == '__main__':
