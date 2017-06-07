@@ -2,3 +2,4 @@
 
 # Tested with 0.3.0 only, so we restrict it to this version
 python-twitch-client == 0.3.0
+requests

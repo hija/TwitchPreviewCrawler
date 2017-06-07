@@ -102,3 +102,6 @@ ENV/
 
 # config ini
 config.ini
+
+# images
+images/*
