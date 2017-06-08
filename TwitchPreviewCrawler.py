@@ -10,7 +10,6 @@ import sys
 import time
 
 from requests import get
-from pathlib import Path
 
 import re
 
@@ -56,8 +55,10 @@ class TwitchPreviewCrawler:
 
 	def _download_image(self, image_url, game_name):
 		# Maybe we should change this line later, it's a mess!
-		file_name = 'images/' + TwitchPreviewCrawler.slugify(game_name) + '/' + image_url.split('ttv/')[1].split(".jpg")[0] + "_" + str(time.mktime(time.gmtime())) + ".jpg"
-		Path(file_name).parent.mkdir(parents=True, exist_ok=True)
+		directory_name = 'images/' + TwitchPreviewCrawler.slugify(game_name)
+		file_name = directory_name + '/' + image_url.split('ttv/')[1].split(".jpg")[0] + "_" + str(time.mktime(time.gmtime())) + ".jpg"
+		
+		os.makedirs(directory_name, exist_ok=True)
 		
 		with open(file_name, "wb") as file:
 			response = get(image_url)
