@@ -74,6 +74,8 @@ class TwitchPreviewCrawler:
 def main():
 	# Setup logging
 	logging.basicConfig(stream=sys.stderr, level=logging.INFO)
+	logging.getLogger('requests').setLevel(logging.ERROR) # Stops boring error messages
+
 	# Load data from config file
 	config = _load_config()
 	if config:
@@ -85,7 +87,7 @@ def main():
 			topgames = [str.strip(x) for x in config.get('Twitch','topgames').split(';')]
 
 		twitch_crawler = TwitchPreviewCrawler(config.get('Twitch', 'key'),
-			int(config.get('Twitch', 'min_delay', fallback=60)),
+			int(config.get('Twitch', 'min_delay', fallback=300)),
 			float(config.get('Twitch', 'min_delay_download', fallback=0.8)),
 			config.get('Twitch', 'preview_size', fallback='medium'),
 			topgames)
@@ -119,7 +121,7 @@ def _load_config():
 			config_parser.set('Twitch', '; Enter your application key here')
 			config_parser.set('Twitch', 'key', '')
 			config_parser.set('Twitch', '; Enter the minimum seconds between checking images')
-			config_parser.set('Twitch', 'min_delay', '60')
+			config_parser.set('Twitch', 'min_delay', '300')
 			config_parser.set('Twitch', '; Enter the minimum seconds between downloading images')
 			config_parser.set('Twitch', 'min_delay_download', '0.8')
 			config_parser.set('Twitch', '; Enter the preview-image size (small medium or large)')
