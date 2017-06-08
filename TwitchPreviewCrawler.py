@@ -16,9 +16,10 @@ import re
 
 class TwitchPreviewCrawler:
 
-	def __init__(self, twitch_api_key, delay, preview_size, topgames = None):
+	def __init__(self, twitch_api_key, delay, image_delay, preview_size, topgames = None):
 		self.abortcrawling = False
 		self._delay = delay
+		self._image_delay = image_delay
 		self.__twitch_api_key = twitch_api_key
 		self._preview_size = preview_size
 		self._client = TwitchClient(client_id = self.__twitch_api_key)
@@ -47,11 +48,12 @@ class TwitchPreviewCrawler:
 				for stream in streams:
 					image_url = stream['preview'][self._preview_size]
 					self._download_image(image_url, game)
-					break
-			break
+					time.sleep(self._image_delay)
+			time.sleep(self._delay)
 
 	def _download_image(self, image_url, game_name):
-		file_name = 'images/' + TwitchPreviewCrawler.slugify(game_name) + '/' + image_url.split('ttv/')[1]
+		# Maybe we should change this line later, it's a mess!
+		file_name = 'images/' + TwitchPreviewCrawler.slugify(game_name) + '/' + image_url.split('ttv/')[1].split(".jpg")[0] + "_" + str(time.mktime(time.gmtime())) + ".jpg"
 		print(file_name)
 		Path(file_name).parent.mkdir(parents=True, exist_ok=True)
 		
@@ -79,7 +81,11 @@ def main():
 			# If we have already defined topgames we use them
 			topgames = [str.strip(x) for x in config.get('Twitch','topgames').split(';')]
 
-		twitch_crawler = TwitchPreviewCrawler(config.get('Twitch', 'key'), int(config.get('Twitch', 'min_delay', fallback=60)), config.get('Twitch', 'preview_size', fallback='medium'), topgames)
+		twitch_crawler = TwitchPreviewCrawler(config.get('Twitch', 'key'),
+			int(config.get('Twitch', 'min_delay', fallback=60)),
+			float(config.get('Twitch', 'min_delay_download', fallback=0.8)),
+			config.get('Twitch', 'preview_size', fallback='medium'),
+			topgames)
 
 		# We write the topgames to our config, so we always crawl the same games!
 		if not(topgames): # Only if we did not have topgames before:
@@ -111,6 +117,8 @@ def _load_config():
 			config_parser.set('Twitch', 'key', '')
 			config_parser.set('Twitch', '; Enter the minimum seconds between checking images')
 			config_parser.set('Twitch', 'min_delay', '60')
+			config_parser.set('Twitch', '; Enter the minimum seconds between downloading images')
+			config_parser.set('Twitch', 'min_delay_download', '0.8')
 			config_parser.set('Twitch', '; Enter the preview-image size (small medium or large)')
 			config_parser.set('Twitch', 'preview_size', 'medium')
 			config_parser.write(f)
