@@ -42,6 +42,7 @@ class TwitchPreviewCrawler:
 
 	def crawl(self):
 		while(not(self.abortcrawling)):
+			logging.info('>> Downloading images!')
 			# First get all channels
 			for game in self.topgames:
 				streams = self._client.streams.get_live_streams(game = game)
@@ -49,12 +50,13 @@ class TwitchPreviewCrawler:
 					image_url = stream['preview'][self._preview_size]
 					self._download_image(image_url, game)
 					time.sleep(self._image_delay)
+			logging.info('>> Downloaded images! Now I am going to sleep.')
 			time.sleep(self._delay)
+
 
 	def _download_image(self, image_url, game_name):
 		# Maybe we should change this line later, it's a mess!
 		file_name = 'images/' + TwitchPreviewCrawler.slugify(game_name) + '/' + image_url.split('ttv/')[1].split(".jpg")[0] + "_" + str(time.mktime(time.gmtime())) + ".jpg"
-		print(file_name)
 		Path(file_name).parent.mkdir(parents=True, exist_ok=True)
 		
 		with open(file_name, "wb") as file:
@@ -70,7 +72,7 @@ class TwitchPreviewCrawler:
 
 def main():
 	# Setup logging
-	logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+	logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 	# Load data from config file
 	config = _load_config()
 	if config:
