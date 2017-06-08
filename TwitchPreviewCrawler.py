@@ -74,7 +74,7 @@ class TwitchPreviewCrawler:
 def main():
 	# Setup logging
 	logging.basicConfig(stream=sys.stderr, level=logging.INFO)
-	logging.getLogger('requests').setLevel(logging.ERROR) # Stops boring error messages
+	logging.getLogger('urllib3').setLevel(logging.WARNING) # Stops boring error messages
 
 	# Load data from config file
 	config = _load_config()
