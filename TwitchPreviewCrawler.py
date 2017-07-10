@@ -90,7 +90,7 @@ class TwitchPreviewCrawler:
 						self._download_image(image_url, game) # Download the image
 						time.sleep(self._image_delay) # Sleep for the delay between image downloads
 			except:
-				logging.error('[!] >> Error while crawling!' + sys.exc_info()[0]) # Error while crawling...time
+				logging.error('[!] >> Error while crawling!' + str(sys.exc_info()[0])) # Error while crawling...time
 				if self._delay_on_error > 0:
 					time.sleep(self._delay_on_error)
 				else:
