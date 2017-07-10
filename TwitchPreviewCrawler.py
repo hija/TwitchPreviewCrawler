@@ -92,16 +92,15 @@ class TwitchPreviewCrawler:
 						self._download_image(image_url, game) # Download the image
 						time.sleep(self._image_delay) # Sleep for the delay between image downloads
 			except KeyboardInterrupt:
-				logging.info('>> Got exit request. Crwler will turn off!')
+				logging.info('>> Got exit request. Crawler will turn off!')
 				self.abortcrawling = True
-				sys.exit(0)
 			except:
 				logging.error('[!] >> Error while crawling!' + str(sys.exc_info()[0])) # Error while crawling...time
 				if self._delay_on_error > 0:
 					time.sleep(self._delay_on_error)
 				else:
 					logging.info('>> Stopping because of the crawling error!')
-					sys.exit(1)
+					self.abortcrawling = True
 			else:
 				logging.info('>> Downloaded images! Now I am going to sleep.') # After images have been downloaded
 			finally:
