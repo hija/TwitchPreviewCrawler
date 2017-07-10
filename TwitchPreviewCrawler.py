@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# coding: utf8
+
 """
 This code was written for Data Analytics 2
 It allows one to download twitch.tv preview images.
