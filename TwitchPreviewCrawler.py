@@ -104,8 +104,9 @@ class TwitchPreviewCrawler:
 					sys.exit(1)
 			else:
 				logging.info('>> Downloaded images! Now I am going to sleep.') # After images have been downloaded
-			finally:		
-				time.sleep(self._delay) # Sleep
+			finally:
+				if(not(self.abortcrawling)):		
+					time.sleep(self._delay) # Sleep
 
 
 	def _download_image(self, image_url, game_name):
