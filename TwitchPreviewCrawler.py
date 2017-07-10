@@ -142,7 +142,7 @@ def main():
 
 		twitch_crawler = TwitchPreviewCrawler(config.get('Twitch', 'key'),
 			int(config.get('Twitch', 'min_delay', fallback=300)),
-			int(config.get('Twitch', 'delay_on_error', fallback=300))
+			int(config.get('Twitch', 'delay_on_error', fallback=300)),
 			float(config.get('Twitch', 'min_delay_download', fallback=0.8)),
 			config.get('Twitch', 'preview_size', fallback='medium'),
 			topgames) # We create the twitchcrawler instance
