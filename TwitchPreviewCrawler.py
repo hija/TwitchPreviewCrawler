@@ -34,7 +34,7 @@ class TwitchPreviewCrawler:
 	Please note, that it might take some time for the crawler to stop, since it uses time.sleep
 	"""
 
-	def __init__(self, twitch_api_key, delay, image_delay, preview_size, topgames = None):
+	def __init__(self, twitch_api_key, delay, delay_on_error, image_delay, preview_size, topgames = None):
 		"""
 		Constructor of the twitch image preview crawler.
 
@@ -46,7 +46,8 @@ class TwitchPreviewCrawler:
 		"""
 
 		self.abortcrawling = False # Set to True to stop the crawler
-		self._delay = delay 
+		self._delay = delay
+		self._delay_on_error = delay_on_error
 		self._image_delay = image_delay
 		self.__twitch_api_key = twitch_api_key
 		self._preview_size = preview_size
@@ -78,14 +79,23 @@ class TwitchPreviewCrawler:
 		"""
 		while(not(self.abortcrawling)):
 			logging.info('>> Downloading images!')
-			for game in self.topgames: # For every game in the gameslist...
-				streams = self._client.streams.get_live_streams(game = game) #... get the livechannel list
-				for stream in streams: # For every stream in the games' livechannel list...
-					image_url = stream['preview'][self._preview_size] #... get the preview image url
-					self._download_image(image_url, game) # Download the image
-					time.sleep(self._image_delay) # Sleep for the delay between image downloads
-			logging.info('>> Downloaded images! Now I am going to sleep.') # After images have been downloaded
-			time.sleep(self._delay) # Sleep
+			try:		
+				for game in self.topgames: # For every game in the gameslist...
+					streams = self._client.streams.get_live_streams(game = game) #... get the livechannel list
+					for stream in streams: # For every stream in the games' livechannel list...
+						image_url = stream['preview'][self._preview_size] #... get the preview image url
+						self._download_image(image_url, game) # Download the image
+						time.sleep(self._image_delay) # Sleep for the delay between image downloads
+			except:
+				logging.error('[!] >> Error while crawling!', sys.exc_info()[0]) # Error while crawling...time
+				if self._delay_on_error > 0:
+					time.sleep(self._delay_on_error)
+				else:
+					logging.info('>> Stopping because of the crawling error!')
+			else:
+				logging.info('>> Downloaded images! Now I am going to sleep.') # After images have been downloaded
+			finally:		
+				time.sleep(self._delay) # Sleep
 
 
 	def _download_image(self, image_url, game_name):
@@ -129,6 +139,7 @@ def main():
 
 		twitch_crawler = TwitchPreviewCrawler(config.get('Twitch', 'key'),
 			int(config.get('Twitch', 'min_delay', fallback=300)),
+			int(config.get('Twitch', 'delay_on_error', fallback=300))
 			float(config.get('Twitch', 'min_delay_download', fallback=0.8)),
 			config.get('Twitch', 'preview_size', fallback='medium'),
 			topgames) # We create the twitchcrawler instance
@@ -169,6 +180,8 @@ def _load_config():
 			config_parser.set('Twitch', 'min_delay', '300')
 			config_parser.set('Twitch', '; Enter the minimum seconds between downloading images')
 			config_parser.set('Twitch', 'min_delay_download', '0.8')
+			config_parser.set('Twitch', '; Enter the delay if a network error occured! Set to 0 to quit.')
+			config_parser.set('Twitch', 'delay_on_error', '300')
 			config_parser.set('Twitch', '; Enter the preview-image size (small medium or large)')
 			config_parser.set('Twitch', 'preview_size', 'medium')
 			config_parser.write(f)
