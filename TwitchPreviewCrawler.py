@@ -86,12 +86,14 @@ class TwitchPreviewCrawler:
 				for game in self.topgames: # For every game in the gameslist...
 					streams = self._client.streams.get_live_streams(game = game) #... get the livechannel list
 					for stream in streams: # For every stream in the games' livechannel list...
+						if self.abortcrawling:
+							break
 						image_url = stream['preview'][self._preview_size] #... get the preview image url
 						self._download_image(image_url, game) # Download the image
 						time.sleep(self._image_delay) # Sleep for the delay between image downloads
 			except KeyboardInterrupt:
 				logging.info('>> Got exit request. Crwler will turn off!')
-				time.sleep(5)
+				self.abortcrawling = True
 				sys.exit(0)
 			except:
 				logging.error('[!] >> Error while crawling!' + str(sys.exc_info()[0])) # Error while crawling...time
